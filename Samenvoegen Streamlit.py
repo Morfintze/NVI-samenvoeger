@@ -1,49 +1,56 @@
 import streamlit as st
-import openpyxl
+from openpyxl import load_workbook
+from copy import copy
 from io import BytesIO
 
-st.title("Excel Samenvoegen met Doorlopende Nummering")
+st.title("Excel Samenvoeger met Doorlopende Nummering")
 
-uploaded_files = st.file_uploader("Selecteer Excel-bestanden om samen te voegen", accept_multiple_files=True)
+uploaded_files = st.file_uploader(
+    "Selecteer één of meerdere Excel-bestanden (.xlsx)",
+    type="xlsx",
+    accept_multiple_files=True
+)
 
 if uploaded_files:
     # Laad het eerste bestand als basis
-    base_wb = openpyxl.load_workbook(uploaded_files[0])
+    base_file = uploaded_files[0]
+    base_wb = load_workbook(filename=BytesIO(base_file.read()))
     base_ws = base_wb.active
 
-# Bepaal de laatste waarde in kolom A
-# Bepaal de laatste waarde in kolom A
-last_number = 0
-for row in base_ws.iter_rows(min_row=2, max_col=1):  # ga uit van header in rij 1
-    try:
-        value = int(row[0].value)
-        if value > last_number:
-            last_number = value
-    except (TypeError, ValueError):
-        continue  # sla lege of niet-numerieke cellen over
+    # Bepaal de laatste waarde in kolom A
+    last_number = 0
+    for row in base_ws.iter_rows(min_row=2, max_col=1):  # header in rij 1
+        try:
+            value = int(row[0].value)
+            if value > last_number:
+                last_number = value
+        except (TypeError, ValueError):
+            continue
 
-
-
-    # Voeg de rest van de bestanden toe
-    for f in uploaded_files[1:]:
-        wb = openpyxl.load_workbook(f)
+    # Voeg de overige bestanden toe
+    for file in uploaded_files[1:]:
+        wb = load_workbook(filename=BytesIO(file.read()))
         ws = wb.active
 
-        for row in ws.iter_rows(min_row=2):  # ga uit van header in rij 1
-            last_number += 1  # tel door
-            new_row = [last_number] + [cell.value for cell in row[1:]]  # behoud alles behalve kolom A
-            base_ws.append(new_row)
+        for i, row in enumerate(ws.iter_rows(min_row=2), start=1):
+            for j, cell in enumerate(row):
+                new_cell = base_ws.cell(row=base_ws.max_row + 1, column=j + 1, value=cell.value)
+                if cell.has_style:
+                    new_cell.font = copy(cell.font)
+                    new_cell.fill = copy(cell.fill)
+                    new_cell.border = copy(cell.border)
+                    new_cell.alignment = copy(cell.alignment)
+                    new_cell.number_format = copy(cell.number_format)
+                    new_cell.protection = copy(cell.protection)
+            # Update kolom A met doorlopende nummering
+            base_ws.cell(row=base_ws.max_row, column=1, value=last_number + i)
+        last_number += ws.max_row - 1  # update last_number voor het volgende bestand
 
-    # Opslaan
+    # Opslaan in memory en downloadknop tonen
     output = BytesIO()
     base_wb.save(output)
-    output.seek(0)
-
     st.download_button(
-        label="Download samengevoegd bestand",
-        data=output,
-        file_name="samengevoegd.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        "Download samengevoegd bestand",
+        data=output.getvalue(),
+        file_name="samengevoegd.xlsx"
     )
-
-
