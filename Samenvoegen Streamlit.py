@@ -12,6 +12,7 @@ if uploaded_files:
     base_ws = base_wb.active
 
 # Bepaal de laatste waarde in kolom A
+# Bepaal de laatste waarde in kolom A
 last_number = 0
 for row in base_ws.iter_rows(min_row=2, max_col=1):  # ga uit van header in rij 1
     try:
@@ -20,6 +21,7 @@ for row in base_ws.iter_rows(min_row=2, max_col=1):  # ga uit van header in rij 
             last_number = value
     except (TypeError, ValueError):
         continue  # sla lege of niet-numerieke cellen over
+
 
 
     # Voeg de rest van de bestanden toe
@@ -43,4 +45,5 @@ for row in base_ws.iter_rows(min_row=2, max_col=1):  # ga uit van header in rij 
         file_name="samengevoegd.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
 
