@@ -11,11 +11,16 @@ if uploaded_files:
     base_wb = openpyxl.load_workbook(uploaded_files[0])
     base_ws = base_wb.active
 
-    # Bepaal de laatste waarde in kolom A
-    last_number = 0
-    for row in base_ws.iter_rows(min_row=2, max_col=1):  # ga uit van header in rij 1
-        if row[0].value is not None:
-            last_number = max(last_number, int(row[0].value))
+# Bepaal de laatste waarde in kolom A
+last_number = 0
+for row in base_ws.iter_rows(min_row=2, max_col=1):  # ga uit van header in rij 1
+    try:
+        value = int(row[0].value)
+        if value > last_number:
+            last_number = value
+    except (TypeError, ValueError):
+        continue  # sla lege of niet-numerieke cellen over
+
 
     # Voeg de rest van de bestanden toe
     for f in uploaded_files[1:]:
@@ -38,3 +43,4 @@ if uploaded_files:
         file_name="samengevoegd.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
