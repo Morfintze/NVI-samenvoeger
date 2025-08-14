@@ -33,12 +33,12 @@ if uploaded_files:
                 new_cell = base_ws.cell(row=i, column=j, value=cell.value)
                 # Kopieer alle stijlen
                if cell.has_style:
-                new_cell.font = copy(cell.font)
-                new_cell.fill = copy(cell.fill)
-                new_cell.border = copy(cell.border)
-                new_cell.alignment = copy(cell.alignment)
-                new_cell.number_format = copy(cell.number_format)
-                new_cell.protection = copy(cell.protection)
+                    new_cell.font = copy(cell.font)
+                    new_cell.fill = copy(cell.fill)
+                    new_cell.border = copy(cell.border)
+                    new_cell.alignment = copy(cell.alignment)
+                    new_cell.number_format = copy(cell.number_format)
+                    new_cell.protection = copy(cell.protection)
 
         
         # Kopieer kolombreedtes
@@ -61,4 +61,5 @@ if uploaded_files:
         file_name="samengevoegd.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
 
