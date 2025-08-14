@@ -1,7 +1,6 @@
 import streamlit as st
 from openpyxl import load_workbook
-from openpyxl.styles import Copy
-from copy import copy
+from copy import copy  # ✅ Gebruik de standaard copy functie
 import io
 
 st.title("📑 Excel Samenvoeger (met layout behoud)")
@@ -33,13 +32,14 @@ if uploaded_files:
             for j, cell in enumerate(row, start=1):
                 new_cell = base_ws.cell(row=i, column=j, value=cell.value)
                 # Kopieer alle stijlen
-                if cell.has_style:
-                    new_cell.font = copy(cell.font)
-                    new_cell.fill = copy(cell.fill)
-                    new_cell.border = copy(cell.border)
-                    new_cell.alignment = copy(cell.alignment)
-                    new_cell.number_format = copy(cell.number_format)
-                    new_cell.protection = copy(cell.protection)
+               if cell.has_style:
+                new_cell.font = copy(cell.font)
+                new_cell.fill = copy(cell.fill)
+                new_cell.border = copy(cell.border)
+                new_cell.alignment = copy(cell.alignment)
+                new_cell.number_format = copy(cell.number_format)
+                new_cell.protection = copy(cell.protection)
+
         
         # Kopieer kolombreedtes
         for col_letter, col_dim in ws_to_merge.column_dimensions.items():
@@ -61,3 +61,4 @@ if uploaded_files:
         file_name="samengevoegd.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
