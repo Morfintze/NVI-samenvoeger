@@ -1,9 +1,10 @@
 import streamlit as st
 from openpyxl import load_workbook
+from openpyxl.drawing.image import Image
 from copy import copy
 import io
 
-st.title("Excel Samenvoeger (Layout behouden)")
+st.title("Excel Samenvoeger (Layout + Logo behouden)")
 
 uploaded_files = st.file_uploader(
     "Upload één of meerdere Excel-bestanden (.xlsx)", 
@@ -27,6 +28,7 @@ if uploaded_files:
             # Vind de eerste lege rij in het basisbestand
             first_empty_row = base_ws.max_row + 1
 
+            # Kopieer cellen + stijlen
             for i, row in enumerate(ws.iter_rows(), start=first_empty_row):
                 for j, cell in enumerate(row, start=1):
                     new_cell = base_ws.cell(row=i, column=j, value=cell.value)
@@ -38,12 +40,18 @@ if uploaded_files:
                         new_cell.number_format = copy(cell.number_format)
                         new_cell.protection = copy(cell.protection)
 
+            # Kopieer afbeeldingen (logo’s)
+            for img in ws._images:
+                new_img = Image(img.ref) if hasattr(img, 'ref') else Image(img._data())
+                new_img.anchor = img.anchor
+                base_ws.add_image(new_img)
+
         # Sla het samengevoegde bestand op in memory
         output = io.BytesIO()
         base_wb.save(output)
         output.seek(0)
 
-        st.success("Bestanden succesvol samengevoegd!")
+        st.success("Bestanden succesvol samengevoegd (inclusief logo’s)!")
         st.download_button(
             label="Download samengevoegd bestand",
             data=output,
